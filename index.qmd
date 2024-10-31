@@ -1,0 +1,204 @@
+---
+title: "TAREA 2"
+subtitle: Curso de programación ps53
+date: 2024/10/30
+author: "Melissa Rodríguez"
+format: html
+toc: true
+lang: es
+theme: cerulean
+---
+# TAREA DE GRÁFICOS GGPLOT Y PLOTLY 
+## _Carga de Bibliotecas_
+
+``` {r}
+#| label: carga-bibliotecas
+#| warning: FALSE
+#| message: FALSE
+
+# Carga de Bibliotecas
+library (tidyverse)
+library(plotly)
+library(DT)
+library(scales)
+library(palmerpenguins)
+library(hrbrthemes)
+library(ggthemes)
+library(hrbrthemes)
+```
+
+## _Carga Datos_
+
+```{r}
+data (ChickWeight)
+data (infert)
+data (quakes)
+```
+
+![Imagen remota](https://images.prismic.io/turing/652ebf73fbd9a45bcec818b7_functional_programming_44edc8e7a1.webp?auto=format%2Ccompress&fit=max&w=3840)
+
+
+## Gráfico de Dispersión
+
+```{r}
+#| lable: Gráfico de dispersión
+#| warning: FALSE
+#| message: FALSE
+   
+# Gráfico de dispersión del conjunto ChickWeight 
+  grafico_pollitos <- ChickWeight |>
+    select(Time, weight, Chick) |>
+      ggplot(aes(x = Time, y = weight, color = as.factor(Chick))) +
+        geom_point() +
+            labs(
+            title = "Peso de los Pollos a Partir de su Nacimiento",
+              x = "Días desde el Nacimiento",
+              y = "Peso en Gramos",
+              color = "ID del Pollito"
+) +
+
+# Estilo mininal
+  theme_minimal()
+
+# Gráfico plotly
+Grafico_interactivo_pollos <- ggplotly (grafico_pollitos)
+
+# Mostrar gráfico interactivo dispersión
+Grafico_interactivo_pollos
+
+# Grafico_interactivo_pollos <- ggplotly(grafico_pollitos, tooltip = "text") |>
+# config(locale = 'es')
+
+```
+
+**_Gráfico 1._** En este gráfico se observa el aumento de peso de los pollitos conforme van pasando los días. Donde la distribución de la media va a rondar entre 150g y 250g aproximadamente después del día 20. Hay un color asignado para cada pollito.
+
+![Pollitos](https://t4.ftcdn.net/jpg/09/31/96/77/240_F_931967743_hn1vxtiwM5d3uvaHUB0j96UsLJ2rd6Gd.jpg)
+
+
+## Gráfico de Barras
+
+```{r}
+# Calcular la suma de abortos espontáneos por edad y renombrar la columna
+abortos_por_edad <- infert |>
+  group_by(age) |>
+    summarise(Abortos_Espontaneos = sum(spontaneous)) |>
+ 
+#Cambiamos el nombre de la columna "Age" por "Edad".
+  rename(Edad = age)  
+
+# Crear gráfico de barras usando ggplot2
+grafico_barras <- ggplot(abortos_por_edad, aes(x = Edad, y = Abortos_Espontaneos)) +
+  geom_bar(stat = "identity", fill = "darkblue") +
+      labs(
+        title = "Gráfico de Barras: Abortos Espontáneos por Edad",
+            x = "Edad",
+            y = "Abortos Espontáneos"
+) +
+
+  theme_economist()
+
+# Convertir a gráfico interactivo con ggplotly
+grafico_interactivo_barras <- ggplotly(grafico_barras)
+
+# Mostrar el gráfico interactivo barras
+grafico_interactivo_barras
+```
+
+**_Gráfico 2._** En el gráfico se observa que hay un mayor número de abortos espontáneos a los 28 y 36 años de edad. 
+
+
+
+
+
+## Gráfico Pastel
+
+```{r}
+#| lable: Gráfico Pastel 
+#| warning: FALSE
+#| message: FALSE
+
+# Crear categorías de magnitud de sismo
+quakes <- quakes |>
+  mutate(mag_categoria = cut(
+        mag,
+        breaks = c(-Inf, 4, Inf),
+            labels = c("Menor que 4", "Mayor que 4")
+  ))
+
+# Calcular la frecuencia por categoría
+mag_counts <- quakes |>
+  count(mag_categoria)
+
+# Crear gráfico de pastel usando ggplot2
+grafico_pie <- ggplot(mag_counts, aes(x = "", y = n, fill = mag_categoria)) +
+  geom_bar(stat = "identity", width = 1) +
+      coord_polar(theta = "y") +
+            labs(
+                title = "Distribución de Magnitudes de Terremoto",
+                x = NULL,
+                y = NULL,
+                fill = "Categoría de Magnitud"
+  ) +
+  
+  scale_fill_manual(values = c("Menor que 4" = "yellow", 
+                               "Mayor que 4" = "turquoise")) +
+# Estilo minimal
+
+  theme_minimal() +
+
+  # Oculta etiquetas innecesarias
+      theme(axis.text.x = element_blank()) 
+
+# Mostrar gráfico no interactivo pie
+grafico_pie
+
+```
+**_Gráfico 3._** Para este gráfico crearon dos categorías temblores. Magnitudes menores a 4 y magnitudes mayores a 4. En amarillo vemos todos los eventos menores que 4 y Turquesa mayores que 4. 
+
+![Terremotos](https://content.nationalgeographic.com.es/medio/2023/08/18/terremoto-de-turquia_461ef0b5_230818114829_1280x720.jpg)
+
+
+
+
+## Gráfico Histograma
+
+```{r}
+#| lable: Histograma 
+#| warning: FALSE
+#| message: FALSE
+# Crear histograma de la magnitud de los terremotos
+grafico_histograma <- quakes |>
+      ggplot(aes(x = mag)) +
+  
+    geom_histogram(binwidth = 0.3, fill = "skyblue", color = "darkblue") +
+          labs(
+              title = "Histograma de la Magnitud de los Terremotos",
+              x = "Magnitud",
+              y = "Frecuencia"
+  ) +
+  
+# Estilo hrbrthemes
+  theme_stata()  
+
+# Convertir a gráfico interactivo con ggplotly
+grafico_histograma_interactivo <- ggplotly(grafico_histograma)
+
+# Mostrar el gráfico interactivo histograma
+grafico_histograma_interactivo
+```
+**_Gráfico 4._**La mayor frecuencia de temblores de este sitio ronda los 4.5 grados de magnitud. Hay una mejor frecuencia de temblores con magnitudes y menores a 4 y superiores a 5. 
+
+
+   "La educación es el arma más poderosa que puedes usar para cambiar el mundo."
+      — Nelson Mandela
+
+
+
+
+## _FUENTE DE IMAGENES_
+  _Imagen 1._ 
+https://images.prismic.io/turing/652ebf73fbd9a45bcec818b7_functional_programming_44edc8e7a1.webp?auto=format%2Ccompress&fit=max&w=3840
+
+  _Imagen 2._
+https://content.nationalgeographic.com.es/medio/2023/08/18/terremoto-de-turquia_461ef0b5_230818114829_1280x720.jpg
